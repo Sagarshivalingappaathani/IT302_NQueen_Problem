@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     // Loop over N from 4 to 15
-    for (int n = 4; n <= 15; n++) {
+    for (int n = 4; n <= 20; n++) {
         N = n;
         int localSol = 0;  // Number of solutions found by this process
         int globalSol = 0; // Total number of solutions across all processes

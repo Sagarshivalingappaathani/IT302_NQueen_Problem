@@ -1,0 +1,2 @@
+mpicxx -o nqp nqp.cpp
+mpirun -n 4 ./nqp
