@@ -2,11 +2,11 @@
 #include <cuda.h>
 #include <chrono>
 
-// Solves N-Queens iteratively using bitwise operations
+
 __device__ void solveNQueensIterativeGPU(int rowMask, int ldMask, int rdMask, int n, int *localCount) {
     int allRows = (1 << n) - 1;
-    int stack[100];  // stack to simulate recursion, max depth = 100
-    int sp = 0;     // stack pointer
+    int stack[100]; 
+    int sp = 0;    
     int safe, p;
 
     stack[sp++] = rowMask;
@@ -19,13 +19,13 @@ __device__ void solveNQueensIterativeGPU(int rowMask, int ldMask, int rdMask, in
         rowMask = stack[--sp];
 
         if (rowMask == allRows) {
-            (*localCount)++;  // Found a solution
+            (*localCount)++; 
             continue;
         }
 
         safe = allRows & (~(rowMask | ldMask | rdMask));
         while (safe) {
-            p = safe & (-safe);  // Least significant bit
+            p = safe & (-safe);  
             safe -= p;
             stack[sp++] = rowMask | p;
             stack[sp++] = (ldMask | p) << 1;
@@ -42,28 +42,27 @@ __global__ void nQueensKernel(int n, int *globalCount) {
 
     if (idx >= n) return;
 
-    int localCount = 0;  // Local counter for each thread
+    int localCount = 0;  
     solveNQueensIterativeGPU(rowMask, ldMask, rdMask, n, &localCount);
 
-    atomicAdd(globalCount, localCount);  // Aggregate results to global count
+    atomicAdd(globalCount, localCount); 
 }
 
 int main() {
     std::cout << "N       Number of Solutions     Execution Time (seconds)" << std::endl;
 
-    // Loop through N = 1 to 15 (excluding N = 16)
-    for (int n = 1; n <= 16; n++) {
+    for (int n = 1; n <= 15; n++) {
         int *d_count;
         cudaMalloc(&d_count, sizeof(int));
-        cudaMemset(d_count, 0, sizeof(int));  // Initialize count to 0
+        cudaMemset(d_count, 0, sizeof(int));  
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        int blockSize = 1000;  // Adjust block size depending on N
-        int gridSize = (n + blockSize - 1) / blockSize;  // Number of blocks
+        int blockSize = 1000;  
+        int gridSize = (n + blockSize - 1) / blockSize; 
 
         nQueensKernel<<<gridSize, blockSize>>>(n, d_count);
-        cudaDeviceSynchronize();  // Wait for the kernel to finish
+        cudaDeviceSynchronize();  
 
         int h_count;
         cudaMemcpy(&h_count, d_count, sizeof(int), cudaMemcpyDeviceToHost);
@@ -73,7 +72,7 @@ int main() {
 
         std::cout << n << "       " << h_count << "                      " << execution_time << std::endl;
 
-        cudaFree(d_count);  // Free device memory
+        cudaFree(d_count); 
     }
 
     return 0;
