@@ -1,0 +1,5 @@
+g++ nqs.cpp -o nqs
+./nqs
+
+g++ nqs1.cpp -o nqs1
+./nqs1

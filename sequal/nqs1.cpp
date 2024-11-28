@@ -65,8 +65,13 @@ class Solution {
 int main() {
   Solution obj;
 
-  // Loop from 4 to 12
-  for (int n = 4; n <= 15; n++) {
+  // Print table header
+  cout << "+-----+-------------------------+----------------------------------+\n";
+  cout << "|  n  | Number of Solutions     | Time Taken (seconds)             |\n";
+  cout << "+-----+-------------------------+----------------------------------+\n";
+
+  // Loop from 1 to 15
+  for (int n = 1; n <= 15; n++) {
     // Start time measurement
     auto start = chrono::high_resolution_clock::now();
 
@@ -79,9 +84,10 @@ int main() {
     // Calculate the duration in seconds with high precision
     chrono::duration<double> duration = end - start;
 
-    // Output the number of solutions and time taken with fractional seconds
-    cout << "For n = " << n << ", Number of solutions = " << ans.size() 
-         << ", Time taken = " << duration.count() << " seconds" << endl;
+    // Output each row in the required format
+    cout << "| " << setw(3) << n << " | " << setw(23) << ans.size() 
+         << " | " << setw(30) << fixed << setprecision(6) << duration.count() << "s  |\n";
+    cout << "+-----+-------------------------+----------------------------------+\n";
   }
 
   return 0;

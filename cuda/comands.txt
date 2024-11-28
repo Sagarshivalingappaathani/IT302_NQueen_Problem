@@ -1,2 +1,2 @@
-nvcc -o nq nqp.cu
-./nq
+nvcc -o nqp nqp.cu
+./nqp

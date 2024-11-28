@@ -1,2 +1,2 @@
-1. g++ -o <executable_file_name> -fopenmp <file_name>
-2. ./<executable_file_name>
+g++ -o nqp -fopenmp nqp.cpp
+./nqp

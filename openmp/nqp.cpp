@@ -1,100 +1,79 @@
-// Parallel version of the N-Queens problem.
-
-#include <iostream>  
+#include <iostream>
 #include <omp.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sstream>
+#include <iomanip> 
 using namespace std;
-// Timing execution
-double startTime, endTime;
 
 // Number of solutions found
 int numofSol = 0;
-
-ostringstream globalOss;
 
 // Board size and number of queens
 int N;
 
 void placeQ(int queens[], int row, int column) {
-    
     for(int i = 0; i < row; i++) {
-        // Vertical
-        if (queens[i] == column) {
-            return;
-        }
-        
-        // Two queens in the same diagonal
-        if (abs(queens[i] - column) == (row-  i))  {
+        // Check vertical and diagonal threats
+        if (queens[i] == column || abs(queens[i] - column) == (row - i)) {
             return;
         }
     }
-    
+
     // Set the queen
     queens[row] = column;
-    
-    if(row == N-1) {
-        
-        #pragma omp atomic 
-            numofSol++;  //Placed the final queen, found a solution
-        
-        ostringstream oss;
-        oss << "The number of solutions found is: " << numofSol << std::endl; 
-        for (int row = 0; row < N; row++) {
-            for (int column = 0; column < N; column++) {
-                if (queens[row] == column) {
-                    oss << "X";
-                }
-                else {
-                    oss << "|";
-                }
-            }
-            oss  << std::endl << std::endl; 
-        }
 
-        #pragma omp critical
-        globalOss << oss.str();
-    }
-    
-    else {
-        
-        // Increment row
+    if(row == N - 1) {
+        // Placed the final queen, found a solution
+        #pragma omp atomic
+        numofSol++;
+    } else {
+        // Recursively place queens in the next row
         for(int i = 0; i < N; i++) {
             placeQ(queens, row + 1, i);
         }
     }
-} // End of placeQ()
+}
 
 void solve() {
-    #pragma omp parallel //num_threads(30)
+    #pragma omp parallel
     #pragma omp single
     {
         for(int i = 0; i < N; i++) {
-            // New task added for first row and each column recursion.
+            // New task for the first row and each column recursion
             #pragma omp task
-            { 
+            {
                 placeQ(new int[N], 0, i);
             }
         }
     }
-} // end of solve()
+}
 
-int main(int argc, char*argv[]) {
+int main() {
+    // Loop over N from 4 to 12
+    cout << "+-----+-------------------------+--------------------------------+" << endl;
+        cout << "| " << setw(3) << "N"
+             << " | " << setw(23) << "Number of Solutions"
+             << " | " << setw(30) << "Execution Time (seconds)" << " |" << endl;
+        cout << "+-----+-------------------------+--------------------------------+" << endl;
+    for (int n = 1; n <= 15; n++) {
+        N = n;
+        numofSol = 0; // Reset the number of solutions for each N
 
-    startTime = omp_get_wtime();   
-    int n;
-    cin>>n;
-    N=n;
-    solve();
-    endTime = omp_get_wtime();
+        // Start timing
+        double startTime = omp_get_wtime();
 
-    cout << globalOss.str();
-  
-    // Print board size, number of solutions, and execution time. 
-    cout << "Board Size: " << N << std::endl; 
-    cout << "Number of solutions: " << numofSol << std::endl; 
-    cout << "Execution time: " << endTime - startTime << " seconds." << std::endl; 
-    
+        // Solve the N-Queens problem
+        solve();
+
+        // End timing
+        double endTime = omp_get_wtime();
+
+         cout << "| " << setw(3) << N
+                 << " | " << setw(23) << numofSol
+                 << " | " << setw(29) << fixed << setprecision(6) << endTime - startTime << "s" << " |" << endl;
+            cout << "+-----+-------------------------+--------------------------------+" << endl;
+    }
+
     return 0;
 }
+
